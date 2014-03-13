@@ -108,6 +108,7 @@ procedure processPossibleSum(const current_input : string);
 	ignore()
       else
         writeln('Got a valid sum assignment: suma(',t,',',a,'..',b,')');
+	writeln('The result is:', suma(t,a,b));
     end;
   end;
 
