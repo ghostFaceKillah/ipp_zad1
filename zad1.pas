@@ -36,6 +36,7 @@ function parseLongInt(const from, too : Integer; const inp : String) : LongInt;
     keepGoing : boolean;
   begin
     resu := 0;
+    // UWAGA, POPRAW ABY NIEAKCEPTOWANE BYŁY 001
     i := from;
     keepGoing := true;
     while keepGoing and (i <= too) do begin
@@ -67,8 +68,10 @@ procedure processPossibleFuncValue(const current_input : string);
       y := parseLongInt(eqPos+1, length(current_input), current_input);
       if (x = -1) or (y = -1) then
 	ignore()
-      else
+      else begin
 	writeln('Got a valid func assignment: f(',x,'):=', y);
+	przypisanie(x,y);
+      end;
     end;
   end;
 
@@ -118,8 +121,10 @@ procedure processPossibleCleanse(const current_input : string);
       t := parseLongInt(7, length(current_input)-1, current_input);
       if t= -1 then
 	ignore()
-      else
+      else begin
 	writeln('Got a valid cleanse assignent: czysc(',t,')');
+	czysc(t);
+      end;
     end;
   end;
 
@@ -132,38 +137,22 @@ procedure debug();
 var
   current_input : string;
 
-  i : integer;
-  j : LongInt;
-  t, curr : tree;
-
 
 begin
-  t := Nil;
-  while (true) do begin
-    readln(j);
-    new(curr);
-    curr^.left := Nil;
-    curr^.right := Nil;
-    curr^.x := j;
-    curr^.y := j;
-    curr^.ref_count := 1;
-    insertNodeIntoTree(curr, t);
-    writeTree(t, 0);
-  end;
-
-  
-  // current_input := '0';
-  // while current_input <> '' do begin
-  //   readln(current_input);
-  //   if copy(current_input, 1,2) = 'f(' then
-  //     processPossibleFuncValue(current_input)
-  //   else if copy(current_input, 1, 5) = 'suma(' then
-  //     processPossibleSum(current_input)
-  //   else if copy(current_input, 1, 6) = 'czysc(' then
-  //     processPossibleCleanse(current_input)
-  //   else if copy(current_input, 1, 5) = 'debug' then
-  //     debug()
-  //   else if current_input <> '' then
-  //     ignore();
-  // end;
+  inicjuj();
+   current_input := '0';
+   while current_input <> '' do begin
+     readln(current_input);
+     if copy(current_input, 1,2) = 'f(' then
+       processPossibleFuncValue(current_input)
+     else if copy(current_input, 1, 5) = 'suma(' then
+       processPossibleSum(current_input)
+     else if copy(current_input, 1, 6) = 'czysc(' then
+       processPossibleCleanse(current_input)
+     else if copy(current_input, 1, 5) = 'debug' then
+       debug()
+     else if current_input <> '' then
+       ignore();
+     writeTrees();
+   end;
 end.
