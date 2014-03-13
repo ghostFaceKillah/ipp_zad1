@@ -10,6 +10,7 @@ type
   node = record
     x : LongInt;
     y : LongInt;
+    l_sum : LongInt;
     ref_count : integer;
     left : tree;
     right : tree;
@@ -53,6 +54,7 @@ implementation
       inc(counter);
       resu^.x := x;
       resu^.y := y;
+      resu^.l_sum := 0;
       resu^.ref_count := 1;
       resu^.left := Nil;
       resu^.right := Nil;
@@ -67,6 +69,7 @@ implementation
       inc(counter);
       resu^.x := t^.x;
       resu^.y := t^.y;
+      resu^.l_sum := t^.l_sum;
       resu^.ref_count := 1;
       resu^.right := nil;
       resu^.left := nil;
@@ -107,14 +110,14 @@ implementation
 
   function przypisanie(x, y : LongInt) : LongInt;
 
-    function treeChanges(const t : tree):boolean;
+    function treeChanges(const t : tree) : integer;
       begin
 	if t = nil then
-	  treeChanges := true
+	  treeChanges := y
 	else if (t^.x = x) and (t^.y = y) then
-	  treeChanges := false
+	  treeChanges := 0
 	else if (t^.x = x) and (t^.y <> y) then
-	  treeChanges := true
+	  treeChanges := y - t^.y
 	else if (t^.x < x) then
 	  treeChanges := treeChanges(t^.right)
 	else
@@ -125,8 +128,10 @@ implementation
     procedure processing(var previous, current : tree);
       var
 	temp : tree;
+	change : integer;
       begin
-	if treeChanges(previous) then begin
+	change := treeChanges(previous);
+	if change <> 0 then begin
           current := copyTree(previous); 
 	  // uwaga! trzeba policzyć czy drzewo całe nie jest niezmienne
           if previous^.x = x then begin
@@ -157,7 +162,8 @@ implementation
 	      processing(previous^.right, current^.right);
               link(previous, current, left);
 	    end
-          else
+          else begin
+	    current^.l_sum := current^.l_sum + change;
             // go left
             if previous^.left = Nil then begin
               current^.left := wrap(x,y);
@@ -166,6 +172,7 @@ implementation
 	      processing(previous^.left, current^.left);
               link(previous, current, right);
 	    end;
+	  end;
         end else begin
 	  current := previous;
 	  inc(previous^.ref_count);
@@ -189,7 +196,7 @@ implementation
       for j := 0 to i do
         write('   ');
       if t <> Nil then begin
-	writeln('node x = ', t^.x, ' y = ', t^.y);
+	writeln('f(', t^.x, ')=', t^.y,' l_sum=', t^.l_sum);
         writeTree(t^.left, i+1);
         writeTree(t^.right, i+1);
       end else
