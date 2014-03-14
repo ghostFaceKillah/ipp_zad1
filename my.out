@@ -1,0 +1,23 @@
+wezlow: 1
+Zignorowano
+wezlow: 3
+suma(0,1..4)=0
+suma(1,1..4)=1
+suma(2,1..4)=6
+suma(3,1..4)=0
+wezlow: 3
+suma(3,1..4)=6
+Zignorowano
+wezlow: 6
+wezlow: 9
+Zignorowano
+wezlow: 11
+Zignorowano
+Zignorowano
+suma(5,1..100)=13
+wezlow: 8
+suma(5,1..100)=0
+Zignorowano
+suma(6,1..2)=4
+wezlow: 11
+suma(7,1..2)=8

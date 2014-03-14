@@ -16,12 +16,12 @@ procedure ignore();
   begin
     writeln('Zignorowano');
   end;
-
+  
 function isDigit(const c : char) : boolean;
   begin
     if (ord(c)<48) or (ord(c)>57) then isDigit:=false else isDigit:=true;
   end;
-
+  
 function char_to_int(c : char) : LongInt;
   begin 
     char_to_int := ord(c) - CHAR_OFFSET;
@@ -40,17 +40,22 @@ function parseLongInt(const from, too : Integer; const inp : String) : LongInt;
     i := from;
     keepGoing := true;
     while keepGoing and (i <= too) do begin
-      if isDigit(inp[i]) then begin
-        resu := resu*10 + char_to_int(inp[i]);
-	inc(i);
-      end else begin
-	resu := -1;
-	keepGoing := false;
+      if isDigit(inp[i]) then
+        if (i-from > 0) and (resu = 0) then begin
+          resu := -1;
+          keepGoing := false;
+        end else begin
+          resu := resu*10 + char_to_int(inp[i]);
+          inc(i);
+        end
+      else begin
+        resu := -1;
+        keepGoing := false;
       end;
     end;
     parseLongInt := resu;
   end;
-
+  
 procedure processPossibleFuncValue(const current_input : string);
   var
     eqPos : integer;
@@ -67,29 +72,27 @@ procedure processPossibleFuncValue(const current_input : string);
       x := parseLongInt(3, eqPos-3, current_input);
       y := parseLongInt(eqPos+1, length(current_input), current_input);
       if (x = -1) or (y = -1) then
-	ignore()
+        ignore()
       else begin
-	writeln('Got a valid func assignment: f(',x,'):=', y);
-	przypisanie(x,y);
+        writeln('wezlow: ', przypisanie(x,y));
       end;
     end;
   end;
 
 procedure processPossibleSum(const current_input : string);
-  // checking for pattern suma(t,a..b)
+// checking for pattern suma(t,a..b)
   var
     commaPos : integer;
     pointPos : integer;
     a, b, t : LongInt;
   begin
-    writeln('Maybe its a sum..');
     commaPos := 6;
     while (commaPos <= length(current_input)) and
-          (current_input[commaPos] <> ',') do
+    (current_input[commaPos] <> ',') do
       inc(commaPos);
     pointPos := commaPos+1;
     while (pointPos <= length(current_input)) and
-          (current_input[pointPos] <> '.') do
+    (current_input[pointPos] <> '.') do
       inc(pointPos);
     if (commaPos = 6) or // no t present
        (commaPos > length(current_input)) or
@@ -98,20 +101,20 @@ procedure processPossibleSum(const current_input : string);
        (current_input[pointPos+1] <> '.') or
        (current_input[length(current_input)] <> ')') or
        (length(current_input) <= pointPos + 2) then // no b present
-      ignore()
+    ignore()
     else begin
       // parse int needed ??
       t := parseLongInt(6, commaPos-1, current_input);
       a := parseLongInt(commaPos+1, pointPos-1 , current_input);
       b := parseLongInt(pointPos+2, length(current_input)-1, current_input);
       if (t=-1) or (a=-1) or (b=-1) then
-	ignore()
-      else
-        writeln('Got a valid sum assignment: suma(',t,',',a,'..',b,')');
-	writeln('The result is:', suma(t,a,b));
+        ignore()
+      else begin
+        writeln('suma(', t, ',', a, '..', b, ')=', suma(t,a,b));
+      end
     end;
   end;
-
+  
 procedure processPossibleCleanse(const current_input : string);
   var
     t : LongInt;
@@ -121,19 +124,12 @@ procedure processPossibleCleanse(const current_input : string);
     else begin
       t := parseLongInt(7, length(current_input)-1, current_input);
       if t= -1 then
-	ignore()
+        ignore()
       else begin
-	writeln('Got a valid cleanse assignent: czysc(',t,')');
-	czysc(t);
+        writeln('wezlow: ', czysc(t));
       end;
     end;
   end;
-
-procedure debug();
-  begin
-    writeln('do heaps and heaps of debugging code');
-  end;
-
 
 var
   current_input : string;
@@ -141,19 +137,17 @@ var
 
 begin
   inicjuj();
-   current_input := '0';
-   while current_input <> '' do begin
-     readln(current_input);
-     if copy(current_input, 1,2) = 'f(' then
-       processPossibleFuncValue(current_input)
-     else if copy(current_input, 1, 5) = 'suma(' then
-       processPossibleSum(current_input)
-     else if copy(current_input, 1, 6) = 'czysc(' then
-       processPossibleCleanse(current_input)
-     else if copy(current_input, 1, 5) = 'debug' then
-       debug()
-     else if current_input <> '' then
-       ignore();
-     writeTrees();
-   end;
+  current_input := '0';
+  while not(eof) do begin
+    readln(current_input);
+    if copy(current_input, 1,2) = 'f(' then
+      processPossibleFuncValue(current_input)
+    else if copy(current_input, 1, 5) = 'suma(' then
+      processPossibleSum(current_input)
+    else if copy(current_input, 1, 6) = 'czysc(' then
+      processPossibleCleanse(current_input)
+    else
+      ignore();
+    // debugging writeTrees();
+  end;
 end.
