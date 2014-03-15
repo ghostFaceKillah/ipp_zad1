@@ -1,3 +1,6 @@
+// Zadanie zaliczeniowe nr 1 - Indywidualny Projekt Programistyczny MIM UW
+// Michał Garmulewicz, 15.03.2014
+// Reprezentacja dynamicznej funkcji na drzewach BST
 unit drzewa;
 
 interface

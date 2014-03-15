@@ -1,9 +1,11 @@
-// Zadanie zaliczeniowe - Indywidualny Projekt Programistyczny MIM UW
+// Zadanie zaliczeniowe nr 1 - Indywidualny Projekt Programistyczny MIM UW
 // Michał Garmulewicz, 15.03.2014
 // Reprezentacja dynamicznej funkcji na drzewach BST
+// plik główny
 program ipp_zad1;
 
 uses drzewa;
+  // a module for handling tree operations and tree memory of the func
 
 const
   CHAR_OFFSET = 48; // for casting char to int
