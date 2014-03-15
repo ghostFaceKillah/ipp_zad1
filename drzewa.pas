@@ -168,7 +168,7 @@ implementation
 	if change <> 0 then begin
           current := copyTree(previous); 
           // current (at the moment t)  node is same as in t-1, but with small 
-          // changes applied under:
+          // changes that are as follows:
           if previous^.x = x then begin
             // current node should get a new y
 	    if y <> 0 then begin 
@@ -176,7 +176,7 @@ implementation
               current^.y := y;
               link(previous, current, both);
 	    end else begin
-              // kill the current node, using algorithm from the task
+              // kill the current node, using algorithm described on moodle
 	      if previous^.right = Nil then begin
                 // if right son is empty, we just dispose and link to the left
 	        dispose(current);
