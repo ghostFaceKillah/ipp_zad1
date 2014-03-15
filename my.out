@@ -1,23 +1,23 @@
 wezlow: 1
-Zignorowano
+zignorowano
 wezlow: 3
 suma(0,1..4)=0
 suma(1,1..4)=1
 suma(2,1..4)=6
-suma(3,1..4)=0
+zignorowano
 wezlow: 3
 suma(3,1..4)=6
-Zignorowano
+zignorowano
 wezlow: 6
 wezlow: 9
-Zignorowano
+zignorowano
 wezlow: 11
-Zignorowano
-Zignorowano
+zignorowano
+zignorowano
 suma(5,1..100)=13
 wezlow: 8
 suma(5,1..100)=0
-Zignorowano
+zignorowano
 suma(6,1..2)=4
 wezlow: 11
 suma(7,1..2)=8

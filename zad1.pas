@@ -1,42 +1,40 @@
 // Zadanie zaliczeniowe - Indywidualny Projekt Programistyczny MIM UW
-// Michał Garmulewicz
+// Michał Garmulewicz, 15.03.2014
 // Reprezentacja dynamicznej funkcji na drzewach BST
-// początek programu	ogólny opis programu: autor, data powstania, co program robi, jak go uruchamiać
-// typ definiowany przez użytkownika	do czego służy, co oznaczają poszczególne składowe
-// procedura lub funkcja	co robi, jak szybko to robi, informacje nt. przekazywanych argumentów, wymagane warunki wstępne, zapewniane warunki końcowe
-// dowolny niebanalny kawałek kodu	jak działa i dlaczego jest zapisany akurat w ten sposób
 program ipp_zad1;
 
 uses drzewa;
 
 const
   CHAR_OFFSET = 48; // for casting char to int
+  MAX_INPUT_LINES = 1000000; // given in the task statement
 
 procedure ignore();
   begin
-    writeln('Zignorowano');
+    writeln('zignorowano');
   end;
   
 function isDigit(const c : char) : boolean;
+  // checks if ASCII char is digit
   begin
     if (ord(c)<48) or (ord(c)>57) then isDigit:=false else isDigit:=true;
   end;
   
 function char_to_int(c : char) : LongInt;
+  // casts char to int
   begin 
     char_to_int := ord(c) - CHAR_OFFSET;
   end;
 
 function parseLongInt(const from, too : Integer; const inp : String) : LongInt;
-  // funkcja operuje na części stringa i zwraca LongInt, gdy ten fragment
-  // to nieujemna liczba całkowita, a -1 w przeciwnym wypadku
+  // parses non-negativeLongInt from a part of a string. If it cannot parse a 
+  // valid string or the string has leading zeros, then it returns -1 
   var
     i : integer;
     resu : LongInt;
     keepGoing : boolean;
   begin
     resu := 0;
-    // UWAGA, POPRAW ABY NIEAKCEPTOWANE BYŁY 001
     i := from;
     keepGoing := true;
     while keepGoing and (i <= too) do begin
@@ -57,6 +55,7 @@ function parseLongInt(const from, too : Integer; const inp : String) : LongInt;
   end;
   
 procedure processPossibleFuncValue(const current_input : string);
+  // checks for correct func val assignment call
   var
     eqPos : integer;
     x, y : LongInt;
@@ -71,7 +70,7 @@ procedure processPossibleFuncValue(const current_input : string);
     else begin
       x := parseLongInt(3, eqPos-3, current_input);
       y := parseLongInt(eqPos+1, length(current_input), current_input);
-      if (x = -1) or (y = -1) then
+      if (x = -1) or (y = -1) or (y > 1000) or (x > 1000000000) then
         ignore()
       else begin
         writeln('wezlow: ', przypisanie(x,y));
@@ -80,11 +79,12 @@ procedure processPossibleFuncValue(const current_input : string);
   end;
 
 procedure processPossibleSum(const current_input : string);
-// checking for pattern suma(t,a..b)
+  // checks for a correct pattern suma(t,a..b) call
   var
     commaPos : integer;
     pointPos : integer;
     a, b, t : LongInt;
+    s : LongInt;
   begin
     commaPos := 6;
     while (commaPos <= length(current_input)) and
@@ -103,19 +103,23 @@ procedure processPossibleSum(const current_input : string);
        (length(current_input) <= pointPos + 2) then // no b present
     ignore()
     else begin
-      // parse int needed ??
       t := parseLongInt(6, commaPos-1, current_input);
       a := parseLongInt(commaPos+1, pointPos-1 , current_input);
       b := parseLongInt(pointPos+2, length(current_input)-1, current_input);
-      if (t=-1) or (a=-1) or (b=-1) then
+      if (t=-1) or (a=-1) or
+         (b=-1) or not(treeExists(t)) or
+         (a > 1000000000) or (b > 1000000000) then
         ignore()
       else begin
-        writeln('suma(', t, ',', a, '..', b, ')=', suma(t,a,b));
+        s := suma(t,a,b);
+        if s <> -1 then
+          writeln('suma(', t, ',', a, '..', b, ')=', s);
       end
     end;
   end;
   
 procedure processPossibleCleanse(const current_input : string);
+  // checks for a valid 'czysc(t)' pattern call
   var
     t : LongInt;
   begin
@@ -123,7 +127,7 @@ procedure processPossibleCleanse(const current_input : string);
       ignore()
     else begin
       t := parseLongInt(7, length(current_input)-1, current_input);
-      if t= -1 then
+      if (t= -1) or not(treeExists(t)) then
         ignore()
       else begin
         writeln('wezlow: ', czysc(t));
@@ -133,21 +137,30 @@ procedure processPossibleCleanse(const current_input : string);
 
 var
   current_input : string;
+  input_count : LongInt;
 
 
 begin
   inicjuj();
+  input_count := 0;
   current_input := '0';
   while not(eof) do begin
-    readln(current_input);
-    if copy(current_input, 1,2) = 'f(' then
-      processPossibleFuncValue(current_input)
-    else if copy(current_input, 1, 5) = 'suma(' then
-      processPossibleSum(current_input)
-    else if copy(current_input, 1, 6) = 'czysc(' then
-      processPossibleCleanse(current_input)
-    else
+    if input_count < MAX_INPUT_LINES then begin
+      inc(input_count);
+      readln(current_input);
+      if copy(current_input, 1,2) = 'f(' then
+        processPossibleFuncValue(current_input)
+      else if copy(current_input, 1, 5) = 'suma(' then
+        processPossibleSum(current_input)
+      else if copy(current_input, 1, 6) = 'czysc(' then
+        processPossibleCleanse(current_input)
+      else
+        ignore();
+      // if you want to debug, then:
+      // writeTrees();
+    end else begin
+      readln(current_input);
       ignore();
-    // debugging writeTrees();
+    end;
   end;
 end.
