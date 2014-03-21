@@ -1,0 +1,44 @@
+
+* Nazwa procedury processing bardzo niewiele mówi.
+  Niestety nawet nie mam ochoty zacząć czytać kodu tej procedury. Najwyraźniej
+  chciał Pan zrobić za dużo naraz, przez co powstał skomplikowany kod,
+  z komentarzami co i rusz. Proponuję to podzielić - osobno dla insert, osobno
+  dla delete, pewnie osobno dla update.
+  To chyba dobra intuicja -- jeśli potrzebuje Pan dużo komentarza, to
+  najwyraźniej z kodem jest coś nie tak.
+
+
+
+* Mam silną hipotezę, że funkcja findLastSmallerOrEq jest w ogóle zbędna.
+
+Program:
+* Nazwy zmiennych raz current_input, a raz eqPos. Polecam lekturę poradnika
+  stylu kodowania.
+
+
+* "const from, too : Integer" -- no jednak to "too" jest nieco dowcipne.
+  Poza tym nie wiadomo, czy to zakres pozycji, czy zakres wartości liczby.
+
+* Funkcja parseLongInt najwyraźniej nie sprawdza, czy liczba nie jest za duża.
+  Pozostałe funkcje najwyraźniej nie sprawdzają, czy długość wiersza nie jest
+  za duża (typ String mieści tylko 256 znaków).
+
+* Hmmmmmmmmm, a może STAŁE?
+  "75       if (x = -1) or (y = -1) or (y > 1000) or (x > 1000000000) then"
+
+* Kusi o funkcję znajdźSymbol:
+  92     while (commaPos <= length(current_input)) and
+  93     (current_input[commaPos] <> ',') do
+  94       inc(commaPos);
+  95     pointPos := commaPos+1;
+  96     while (pointPos <= length(current_input)) and
+  97     (current_input[pointPos] <> '.') do
+  98       inc(pointPos);
+  A tak w ogóle, to drugie linijki while'a koniecznie trzeba wciąć.
+
+* Brakuje wcięcia w "106     ignore()"
+
+
+* Decyzja o tym, żeby korzystać w parserze z treeExists z modułu drzewa, wydaje
+  mi się trochę kontrowersyjna.
+
