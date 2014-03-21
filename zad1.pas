@@ -7,11 +7,13 @@ program ipp_zad1;
 uses drzewa;
 
 const
-  CHAR_OFFSET = 48; // for casting Char to Int
-  MAX_INPUT_LINES = 1000000; // given in the task statement
+  MAX_INPUT_LINES = 1000000;
   // REWRITE - MAX VALID STATEMENTS 
   MAX_X_VAL = 1000000000;
   MAX_Y_VAL = 1000;
+
+
+// HELPER FUNCTIONS //
 
 procedure ignore();
   begin
@@ -60,6 +62,10 @@ function parseLongInt(const from, too : Integer; const inp : String) : LongInt;
     end;
     parseLongInt := resu;
   end;
+
+
+
+// INPUT PROCESSORS //
   
 procedure processPossibleFuncValue(const input_line : String);
   // checks for correct func val assignment call
@@ -108,7 +114,7 @@ procedure processPossibleSum(const input_line : String);
        (input_line[point_pos + 1] <> '.') or
        (input_line[length(input_line)] <> ')') or
        (length(input_line) <= point_pos + 2) then // no b present
-    ignore()
+      ignore()
     else begin
       t := parseLongInt(6, comma_pos - 1, input_line);
       a := parseLongInt(comma_pos + 1, point_pos - 1 , input_line);
@@ -142,10 +148,12 @@ procedure processPossibleCleanse(const input_line : String);
     end;
   end;
 
+
+// MAIN LOOP // 
+
 var
   input_line : String;
   valid_input_count : LongInt;
-
 
 begin
   inicjuj();
