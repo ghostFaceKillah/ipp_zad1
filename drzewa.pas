@@ -1,22 +1,23 @@
 // Zadanie zaliczeniowe nr 1 - Indywidualny Projekt Programistyczny MIM UW
 // Michał Garmulewicz, 15.03.2014
 // Reprezentacja dynamicznej funkcji na drzewach BST
+
 unit drzewa;
 
 interface
 
   procedure inicjuj();
-  // run at the beginning. nils array of trees, sets up node node_counter and 
+  // runs at the beginning. nils array of trees, sets up node node_counter and 
   // used array space node_counter 
 
-  function przypisanie(x, y : LongInt) : LongInt;
+  function przypisanie(const x, y : LongInt) : LongInt;
   // used for handling valid assignment. Returns current number of nodes
 
-  function suma(nr_funkcji, lewy_argument, prawy_argument : LongInt) : LongInt;
-  // used for handling valid 'suma' calls. Returns wanted sum
+  function suma(const nr_funkcji, lewy_argument, prawy_argument : LongInt) : LongInt;
+  // used for handling syntactically valid 'suma' calls. Returns wanted sum
 
-  function czysc(nr_funkcji : LongInt) : LongInt;
-  // used for handling valid 'czysc' calls
+  function czysc(const nr_funkcji : LongInt) : LongInt;
+  // used for handling syntactically valid 'czysc' calls
 
   function treeExists(const i : LongInt) : Boolean;
   // used for checking if given tree exists
@@ -89,11 +90,10 @@ implementation
       assert(current <> nil);
       assert((which_direction = 'left') or
              (which_direction = 'right') or
-             (which_direction = 'both')
-      );
+             (which_direction = 'both'));
       if (which_direction = 'left') or (which_direction = 'both') then begin
         current^.left := previous^.left;
-        if previous^.left <> nil then
+        if (previous^.left <> nil) then
           inc(previous^.left^.ref_count);
       end;
       if (which_direction = 'right') or (which_direction = 'both') then begin
@@ -101,15 +101,6 @@ implementation
         if (previous^.right <> nil) then
           inc(previous^.right^.ref_count);
       end;
-    end;
-
-  function findSmallestNode(t : Tree) : Tree;
-    // finds node with smallest x in the tree
-    begin 
-      assert(t <> nil);
-      while t^.left <> nil do
-        t := t^.left;
-      findSmallestNode := t;
     end;
 
   function getFunctionValue(const t : Tree; const x :  LongInt) : Integer;
@@ -133,12 +124,12 @@ implementation
         current := copyTree(previous);
         assert(current^.x <> x);
         if (previous^.x < x) then begin
-          link(previous, current, 'left');
-          insertNodeIntoTree(previous^.right, current^.right, x, y);
+           link(previous, current, 'left');
+           insertNodeIntoTree(previous^.right, current^.right, x, y);
          end else begin
-          link(previous, current, 'right');
-          current^.l_sum := current^.l_sum + y;
-          insertNodeIntoTree(previous^.left, current^.left, x, y);
+           link(previous, current, 'right');
+           current^.l_sum := current^.l_sum + y;
+           insertNodeIntoTree(previous^.left, current^.left, x, y);
         end;
       end;
     end;
@@ -219,7 +210,7 @@ implementation
     end;
 
 
-  function przypisanie(x, y : LongInt) : LongInt;
+  function przypisanie(const x, y : LongInt) : LongInt;
     var
       current_y : LongInt;
 
@@ -284,8 +275,7 @@ implementation
       end;
     end;
 
-
-  function czysc(nr_funkcji : LongInt) : LongInt;
+  function czysc(const nr_funkcji : LongInt) : LongInt;
     begin
       if (nr_funkcji > functions_counter) then
         czysc := -1
@@ -296,7 +286,7 @@ implementation
       end;
     end;
 
-  function partialSum(x : LongInt; t : tree) : LongInt;
+  function partialSum(const x : LongInt; t : tree) : LongInt;
     var
       sum : LongInt;
     begin
@@ -311,11 +301,12 @@ implementation
         partialSum := sum;
     end;
     
-  function suma(nr_funkcji, lewy_argument, prawy_argument : LongInt) : LongInt;
+  function suma(const nr_funkcji, lewy_argument,
+                prawy_argument : LongInt) : LongInt;
     begin
       if (nr_funkcji > functions_counter) then
         suma := -1
-      else if trees[nr_funkcji] = nil then
+      else if (trees[nr_funkcji] = nil) then
         suma := 0
       else begin
         suma := partialSum(prawy_argument, trees[nr_funkcji])
