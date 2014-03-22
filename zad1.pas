@@ -166,7 +166,7 @@ begin
   while not(eof) do begin
     readln(input_line);
     inc(valid_input_count);
-    if (valid_input_count < MAX_VALID_LINES) and
+    if (valid_input_count <= MAX_VALID_LINES) and
        (length(input_line) < 100) then begin
       if (copy(input_line, 1, 2) = 'f(') then
         processPossibleFuncValue(input_line)
