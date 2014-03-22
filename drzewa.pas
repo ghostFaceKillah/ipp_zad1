@@ -45,15 +45,11 @@ implementation
     end;
 
     TheTrees = Array[0..MAX_TREE_NUM] of Tree;
-    // for holding trees at diffrent moments of time 
 
   var
     trees : TheTrees;
-    // array for holding all the trees
     node_counter : LongInt;
-    // how many distinct nodes we have allocated
     functions_counter : Integer;
-    // where in trees array 'time' we are (how many trees there are)
   
   procedure inicjuj();
     var
@@ -89,8 +85,12 @@ implementation
                  const which_direction : String);
     // used for automatic linking of unchanged subtrees. 
     begin
-      if (previous = nil) or (current = nil) then
-        writeln('ERROR LINKING');
+      assert(previous <> nil);
+      assert(current <> nil);
+      assert((which_direction = 'left') or
+             (which_direction = 'right') or
+             (which_direction = 'both')
+      );
       if (which_direction = 'left') or (which_direction = 'both') then begin
         current^.left := previous^.left;
         if previous^.left <> nil then
@@ -112,107 +112,134 @@ implementation
       findSmallestNode := t;
     end;
 
-  function przypisanie(x, y : LongInt) : LongInt;
+  function getFunctionValue(const t : Tree; const x :  LongInt) : Integer;
+    begin
+      if (t = nil) then
+        getFunctionValue := 0
+      else if (t^.x = x) then
+        getFunctionValue := t^.y
+      else if (t^.x < x) then
+        getFunctionValue := getFunctionValue(t^.right, x)
+      else
+        getFunctionValue := getFunctionValue(t^.left, x);
+    end;
 
-    function howMuchYChanges(const t : tree; const x, y : LongInt) : Integer;
-      // subroutine used for calculating if and how much the tree changes,
-      // measured in abs of y change.
-      begin
-        if (t = nil) then
-          howMuchYChanges := y
-        else if (t^.x = x) then
-          howMuchYChanges := y - t^.y
-        else if (t^.x < x) then
-          howMuchYChanges := howMuchYChanges(t^.right, x, y)
-        else
-          howMuchYChanges := howMuchYChanges(t^.left, x, y);
-      end;
-
-    procedure processing(var previous, current : Tree; x, y : LongInt);
-      // first it calculates how much and where the previous tree should change
-      // Later it applies the change. It also links the unchaged subtrees on
-      // the go, using link() procedure.
-      // REWRITE DELETING 
-      // REFACTOR INTO THREE SMALL FUNCS
-      var
-        temp : Tree;
-        change_of_y : Integer;
-      begin
-        change_of_y := howMuchYChanges(previous, x, y);
-        // calculate if tree change_of_ys
-        if (change_of_y <> 0) then begin
-          current := copyTree(previous); 
-          // current (at the moment t)  node is same as in t - 1, but with small 
-          // modificationsthat are as follows:
-          if previous^.x = x then begin
-            // current node should get a new y
-            if y <> 0 then begin 
-              // just overwrite the old y
-              current^.y := y;
-              link(previous, current, 'both');
-            end else begin
-              // kill the current node, using algorithm described on moodle
-              //  Definicja nie jest rekurencyjna. Usuwanie węzła o najmniejszym kluczu jest prostsze niż usuwanie dowolnego węzła. Mianowicie węzeł o najmniejszym kluczu nie posiada lewego syna, więc po jego usunięciu za wynikowe drzewo bierzemy jego prawego syna.
-              if (previous^.right = nil) then begin
-                // if right child is empty, we just dispose and link to the left
-                dispose(current);
-                dec(node_counter);
-                current := previous^.left;
-                if (previous^.left <> nil) then
-                  inc(previous^.left^.ref_count);
-              end else begin
-                // we fill the content of current node with content of smallest
-                // x element from the right subtree ...
-                temp := findSmallestNode(previous^.right);
-                current^.x := temp^.x;
-                current^.y := temp^.y;
-                // ... and dispose of the node,  which contents
-                //  were taken, by setting its y to 0 and processing it
-                x := current^.x;
-                y := 0;
-                processing(previous^.right, current^.right, x, y);
-                link(previous, current, 'left');
-              end
-            end
-          end else if (previous^.x < x) then
-            // go right looking for right place for the node
-            if (previous^.right = nil) then begin
-              // free space in the tree to insert the node
-              current^.right := wrap(x, y, 0);
-              link(previous, current, 'left');
-            end else begin
-              // no space here, keep looking
-              processing(previous^.right, current^.right, x, y);
-              link(previous, current, 'left');
-            end
-          else begin
-            current^.l_sum := current^.l_sum + change_of_y;
-            // go left, but remember to modify l_sum
-            if (previous^.left = nil) then begin
-              // some space here, insert
-              current^.left := wrap(x, y, 0);
-              link(previous, current, 'right');
-            end else begin
-              // no space here
-              processing(previous^.left, current^.left, x, y);
-              link(previous, current, 'right');
-            end;
-          end;
-        end else begin
-          // the new tree is same as old one, so we just link to it
-          current := previous;
-          inc(previous^.ref_count);
+  procedure insertNodeIntoTree(var previous : Tree; var current : Tree; 
+                               const x, y : LongInt);
+    begin
+      if (previous = nil) then 
+        current := wrap(x, y, 0)
+      else begin
+        current := copyTree(previous);
+        assert(current^.x <> x);
+        if (previous^.x < x) then begin
+          link(previous, current, 'left');
+          insertNodeIntoTree(previous^.right, current^.right, x, y);
+         end else begin
+          link(previous, current, 'right');
+          current^.l_sum := current^.l_sum + y;
+          insertNodeIntoTree(previous^.left, current^.left, x, y);
         end;
       end;
+    end;
+
+  procedure changeValueOfFunction(var previous : Tree; var current : Tree;
+                                  const x, y, dy : LongInt);
+    begin
+      assert(previous <> nil);
+      current := copyTree(previous);
+      if (previous^.x = x) then begin
+        current^.y := y;
+        link(previous, current, 'both');
+      end else if (previous^.x < x) then begin
+        link(previous, current, 'left');
+        changeValueOfFunction(previous^.right, current^.right, x, y, dy);
+      end else begin
+        link(previous, current, 'right');
+        current^.l_sum := current^.l_sum + dy;
+        changeValueOfFunction(previous^.left, current^.left, x, y, dy);
+      end;
+    end;
+
+  procedure deleteHelper(var previous : Tree; var current : Tree; 
+                         const dy : LongInt);
+    // it deletes the smallest x child of right subtree of node
+    // being deleted in the next procedure. It starts from the root of
+    // the right subtree and copies & links all nodes on the way down
+    var
+      temp : Tree;
+    begin
+      current := copyTree(previous);
+      if (previous^.left <> nil) then begin
+        current^.l_sum := current^.l_sum + dy;
+        link(previous, current, 'right');
+        deleteHelper(previous^.left, current^.left, dy);
+      end else begin
+        temp := current;
+        current := previous^.right;
+        dispose(temp);
+        dec(node_counter);
+        if (current <> nil) then
+          inc(current^.ref_count);
+      end;
+    end;
+
+  procedure deleteNode(var previous : Tree; var current : Tree;
+                       const x, dy : LongInt);
+    var
+      temp : Tree;
+    begin
+      assert(previous <> nil);
+      current := copyTree(previous);
+      if (previous^.x = x) then begin
+        if (previous^.right = nil) then begin
+          dispose(current);
+          dec(node_counter);
+          current := previous^.left;
+          if (current <> nil) then 
+            inc(previous^.left^.ref_count);
+        end else begin
+          temp := previous^.right;
+          while (temp^.left <> nil) do begin
+            temp := temp^.left;
+          end;
+          current^.x := temp^.x;
+          current^.y := temp^.y;
+          link(previous, current, 'left');
+          deleteHelper(previous^.right, current^.right, -temp^.y);
+        end
+      end else if (previous^.x < x) then begin
+        link(previous, current, 'left');
+        deleteNode(previous^.right, current^.right, x, dy);
+      end else begin
+        link(previous, current, 'right');
+        current^.l_sum := current^.l_sum + dy;
+        deleteNode(previous^.left, current^.left, x, dy);
+      end;
+    end;
+
+
+  function przypisanie(x, y : LongInt) : LongInt;
+    var
+      current_y : LongInt;
 
     begin
-      // now we just need to call processing() with good args
       inc(functions_counter);
-      if (trees[functions_counter - 1] = nil) then begin
-        // no t - 1 tree to compare to, so we make a new one
-        trees[functions_counter] := wrap(x, y, 0);
-      end else
-        processing(trees[functions_counter - 1], trees[functions_counter], x, y);
+      current_y := getFunctionValue(trees[functions_counter - 1], x);
+      if (current_y = 0) and (y > 0) then
+        insertNodeIntoTree(trees[functions_counter - 1], 
+                           trees[functions_counter], x, y)
+      else if (current_y > 0) and (y > 0) and (current_y <> y) then
+        changeValueOfFunction(trees[functions_counter - 1],
+                              trees[functions_counter], x, y, y - current_y)
+      else if (current_y > 0) and (y = 0) then
+        deleteNode(trees[functions_counter - 1], trees[functions_counter],
+                   x, -current_y)
+      else begin
+        trees[functions_counter] := trees[functions_counter - 1];
+        if (trees[functions_counter] <> nil) then
+          inc(trees[functions_counter - 1]^.ref_count);
+      end;
       przypisanie := node_counter;
     end;
 
@@ -224,8 +251,8 @@ implementation
         write('   ');
       if (t <> nil) then begin
         writeln('f(', t^.x, ')=', t^.y,' l_sum=', t^.l_sum);
-        writeTree(t^.left, i+1);
-        writeTree(t^.right, i+1);
+        writeTree(t^.left, i + 1);
+        writeTree(t^.right, i + 1);
       end else
         writeln('nil');
     end;
@@ -252,68 +279,47 @@ implementation
           cleanse(t^.right);
           dispose(t);
           dec(node_counter);
-          t := nil;
         end;
+        t := nil;
       end;
     end;
 
 
   function czysc(nr_funkcji : LongInt) : LongInt;
     begin
-      cleanse(trees[nr_funkcji]);
-      trees[nr_funkcji] := nil;
-      czysc := node_counter;
+      if (nr_funkcji > functions_counter) then
+        czysc := -1
+      else begin
+        cleanse(trees[nr_funkcji]);
+        trees[nr_funkcji] := nil;
+        czysc := node_counter;
+      end;
     end;
 
-  function findLastSmallerOrEq(x : LongInt; t : tree) : LongInt;
-    var
-      resu : LongInt;
-    begin
-      resu := 0;
-      while t <> nil do
-        if (t^.x = x) then begin
-          t := nil;
-          resu := x;
-        end else if (t^.x > x) then
-          t := t^.left
-        else begin
-          resu := t^.x;
-          t := t^.right;
-        end;
-      findLastSmallerOrEq := resu;
-    end;
-  
-  function partialSum(x : LongInt; t : Tree) : LongInt;
-    // returns sum of y for x from 1 to  x, using sums of left subtrees
-    // please note that x is _always_ in the tree, because its the maximal
-    // smaller or equal than 'real' x element not the 'real' x.
+  function partialSum(x : LongInt; t : tree) : LongInt;
     var
       sum : LongInt;
     begin
       sum := 0;
-      if (x <> 0) then begin
-        while t^.x <> x do 
-          if (x > t^.x) then begin
-            sum := sum + t^.y + t^.l_sum;
-            t := t^.right;
-          end else
-            t := t^.left;
-        sum := sum + t^.y + t^.l_sum;
-      end;
-      partialSum := sum;
+      while (t <> nil) do
+        if (t^.x > x) then
+          t := t^.left
+        else begin
+          sum := sum + t^.y + t^.l_sum;
+          t := t^.right;
+        end;
+        partialSum := sum;
     end;
-      
+    
   function suma(nr_funkcji, lewy_argument, prawy_argument : LongInt) : LongInt;
-    var
-      left_bound, right_bound : LongInt;
     begin
-      if trees[nr_funkcji] = nil then
+      if (nr_funkcji > functions_counter) then
+        suma := -1
+      else if trees[nr_funkcji] = nil then
         suma := 0
       else begin
-        left_bound := findLastSmallerOrEq(lewy_argument - 1, trees[nr_funkcji]);
-        right_bound := findLastSmallerOrEq(prawy_argument, trees[nr_funkcji]);
-        suma := partialSum(right_bound, trees[nr_funkcji]) 
-                 - partialSum(left_bound, trees[nr_funkcji]);
+        suma := partialSum(prawy_argument, trees[nr_funkcji])
+                - partialSum(lewy_argument - 1, trees[nr_funkcji]);
       end;
     end;
 
@@ -330,5 +336,4 @@ implementation
         cleanse(trees[i]);
       assert(node_counter = 0);
     end;
-
 end.
