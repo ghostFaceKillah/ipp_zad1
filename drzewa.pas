@@ -152,6 +152,7 @@ implementation
               link(previous, current, 'both');
             end else begin
               // kill the current node, using algorithm described on moodle
+              //  Definicja nie jest rekurencyjna. Usuwanie węzła o najmniejszym kluczu jest prostsze niż usuwanie dowolnego węzła. Mianowicie węzeł o najmniejszym kluczu nie posiada lewego syna, więc po jego usunięciu za wynikowe drzewo bierzemy jego prawego syna.
               if (previous^.right = nil) then begin
                 // if right child is empty, we just dispose and link to the left
                 dispose(current);

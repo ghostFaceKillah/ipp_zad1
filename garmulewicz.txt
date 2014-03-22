@@ -1,4 +1,3 @@
-
 * Nazwa procedury processing bardzo niewiele mówi.
   Niestety nawet nie mam ochoty zacząć czytać kodu tej procedury. Najwyraźniej
   chciał Pan zrobić za dużo naraz, przez co powstał skomplikowany kod,
