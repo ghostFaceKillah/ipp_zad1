@@ -45,21 +45,25 @@ function parseLongInt(const from, to_where : Integer;
     resu : LongInt;
     keep_going : Boolean;
   begin
-    resu := 0;
-    i := from;
-    keep_going := true;
-    while keep_going and (i <= to_where) do begin
-      if ((i - from > 0) and (resu = 0)) or
-          (resu > MAX_X_VAL) or
-          not(isDigit(inp[i])) then begin
-        resu := -1;
-        keep_going := false;
-      end else begin
-        resu := resu * 10 + charToInt(inp[i]);
-        inc(i);
+    if (from > to_where) then
+      parseLongInt := -1
+    else begin 
+      resu := 0;
+      i := from;
+      keep_going := true;
+      while (keep_going) and (i <= to_where) do begin
+        if ((i - from > 0) and (resu = 0)) or
+            (resu > MAX_X_VAL) or
+            not(isDigit(inp[i])) then begin
+          resu := -1;
+          keep_going := false;
+        end else begin
+          resu := resu * 10 + charToInt(inp[i]);
+          inc(i);
+        end;
       end;
+      parseLongInt := resu;
     end;
-    parseLongInt := resu;
   end;
 
 

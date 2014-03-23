@@ -234,21 +234,23 @@ implementation
       przypisanie := node_counter;
     end;
 
-  procedure writeTree(const t : Tree; i : Integer);
+  procedure writeTree(const t : Tree; h : Integer);
+    // used for debugging
     var
       j : Integer;
     begin
-      for j := 0 to i do
+      for j := 0 to h do
         write('   ');
       if (t <> nil) then begin
         writeln('f(', t^.x, ')=', t^.y,' l_sum=', t^.l_sum);
-        writeTree(t^.left, i + 1);
-        writeTree(t^.right, i + 1);
+        writeTree(t^.left, h + 1);
+        writeTree(t^.right, h + 1);
       end else
         writeln('nil');
     end;
 
   procedure writeTrees();
+    // used for debugging
     var 
       j : Integer;
     begin
